@@ -1,47 +1,99 @@
-# Getting Started with GitHub Copilot
+# API Testing Repository
 
-_Get started using GitHub Copilot in less than an hour._
+This repository contains a sample FastAPI application and a Postman-based API testing workspace for the Mergington High School Activities API.
 
-## Welcome
+## Repository structure
 
-- **Who is this for**: Developers at any experience level looking to accelerate their code workflow.
-- **What you'll learn**: The different ways to interact with Copilot to explain, write, plan, and develop code.
-- **What you'll build**: You will guide Copilot to update Mergington High School's extracurricular activities website.
-- **Prerequisites**:
-  - Skills exercise: [Introduction to GitHub](https://github.com/skills/introduction-to-github)
-  - Familiarity with [VS Code](https://code.visualstudio.com/)
-  - Basic coding principles
-- **How long**: This exercise takes less than one hour to complete.
+```text
+.
+├── postman/
+│   ├── collections/
+│   │   ├── activities/
+│   │   │   └── activities-catalog.postman_collection.json
+│   │   └── signups/
+│   │       └── activity-signups.postman_collection.json
+│   └── environments/
+│       ├── dev.postman_environment.json
+│       └── qa.postman_environment.json
+├── src/
+│   ├── app.py
+│   └── README.md
+├── requirements.txt
+└── pytest.ini
+```
 
-In this exercise, you will:
+## Postman organization
 
-1. Use a preconfigured Codespace to run VS Code in your browser.
-1. Learn different interaction options to develop and plan with GitHub Copilot.
-1. Use Copilot to summarize and review your pull request.
+The Postman assets follow API testing best practices:
 
-### How to start this exercise
+- Collections are organized by feature (`activities` and `signups`).
+- Environments are separated by deployment target (`dev` and `qa`).
+- Requests use reusable environment variables such as `baseUrl` and `maxResponseTime`.
+- Test scripts stay close to the request they validate so they are easy to maintain.
+- Environment files contain placeholders only and do not store secrets.
 
-Simply copy the exercise to your account, then give your favorite Octocat (Mona) **about 20 seconds** to prepare the first lesson, then **refresh the page**.
+## Included test coverage
 
-[![](https://img.shields.io/badge/Copy%20Exercise-%E2%86%92-1f883d?style=for-the-badge&logo=github&labelColor=197935)](https://github.com/new?template_owner=skills&template_name=getting-started-with-github-copilot&owner=%40me&name=skills-getting-started-with-github-copilot&description=Exercise:+Get+started+using+GitHub+Copilot&visibility=public)
+### Activities catalog collection
 
-<details>
-<summary>Having trouble? 🤷</summary><br/>
+`postman/collections/activities/activities-catalog.postman_collection.json`
 
-When copying the exercise, we recommend the following settings:
+- Positive test for `GET /activities`
+- Status code validation
+- Response time validation
+- Header validation
+- JSON schema validation
+- Response body validation
+- Boundary validation to ensure participant counts stay within the configured limit
 
-- For owner, choose your personal account or an organization to host the repository.
+### Activity signups collection
 
-- We recommend creating a public repository, since private repositories will use Actions minutes.
-   
-If the exercise isn't ready in 20 seconds, please check the [Actions](../../actions) tab.
+`postman/collections/signups/activity-signups.postman_collection.json`
 
-- Check to see if a job is running. Sometimes it simply takes a bit longer.
+- Positive test for successful sign-up
+- Negative test for unknown activities
+- Boundary test with a long email alias
+- Security tests using injection-style and XSS-style payloads
 
-- If the page shows a failed job, please submit an issue. Nice, you found a bug! 🐛
+## Environment files
 
-</details>
+- `postman/environments/dev.postman_environment.json`
+- `postman/environments/qa.postman_environment.json`
 
----
+Update the `baseUrl` values as needed for your actual Dev and QA deployments.
 
-&copy; 2025 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+## Run the API locally
+
+Install dependencies and start the sample API:
+
+```bash
+python -m pip install -r requirements.txt
+uvicorn src.app:app --reload
+```
+
+The API is then available at `http://localhost:8000`.
+
+## Run the collections in Postman
+
+1. Import both collection files from `postman/collections/`.
+2. Import the desired environment file from `postman/environments/`.
+3. Select the environment in Postman.
+4. Update `baseUrl` if needed.
+5. Run a collection with the Postman Collection Runner.
+
+## Run the collections with Newman
+
+You can also run the collections from the command line without changing the repository:
+
+```bash
+npx newman run postman/collections/activities/activities-catalog.postman_collection.json \
+  -e postman/environments/dev.postman_environment.json
+
+npx newman run postman/collections/signups/activity-signups.postman_collection.json \
+  -e postman/environments/dev.postman_environment.json
+```
+
+## Notes
+
+- The sample application documentation remains in `/src/README.md`.
+- The security requests are designed to verify the API fails safely and avoids 5xx responses.
